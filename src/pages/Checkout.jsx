@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
@@ -11,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/components/ui/use-toast";
-import { Loader2, CreditCard, Landmark, PaypalLogo } from "lucide-react";
+import { Loader2, CreditCard, Landmark, CircleDollarSign } from "lucide-react";
 
 const Checkout = () => {
   const { cart, total, clearCart } = useCart();
@@ -21,7 +20,6 @@ const Checkout = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("credit-card");
   
-  // Shipping information
   const [shippingInfo, setShippingInfo] = useState({
     firstName: currentUser?.name?.split(" ")[0] || "",
     lastName: currentUser?.name?.split(" ")[1] || "",
@@ -34,7 +32,6 @@ const Checkout = () => {
     country: "USA",
   });
   
-  // Billing information (same as shipping by default)
   const [sameAsShipping, setSameAsShipping] = useState(true);
   const [billingInfo, setBillingInfo] = useState({
     firstName: "",
@@ -46,7 +43,6 @@ const Checkout = () => {
     country: "USA",
   });
   
-  // Payment information
   const [cardInfo, setCardInfo] = useState({
     cardNumber: "",
     cardName: "",
@@ -54,7 +50,6 @@ const Checkout = () => {
     cvv: "",
   });
   
-  // Calculate order totals
   const subtotal = total;
   const shipping = subtotal > 50 ? 0 : 5.99;
   const tax = (subtotal * 0.07).toFixed(2);
@@ -76,7 +71,6 @@ const Checkout = () => {
   };
   
   const validateForm = () => {
-    // Validate shipping info
     for (const [key, value] of Object.entries(shippingInfo)) {
       if (!value && key !== 'phone') {
         toast({
@@ -88,7 +82,6 @@ const Checkout = () => {
       }
     }
     
-    // Validate billing info if different from shipping
     if (!sameAsShipping) {
       for (const [key, value] of Object.entries(billingInfo)) {
         if (!value) {
@@ -102,7 +95,6 @@ const Checkout = () => {
       }
     }
     
-    // Validate payment information
     if (paymentMethod === "credit-card") {
       for (const [key, value] of Object.entries(cardInfo)) {
         if (!value) {
@@ -115,7 +107,6 @@ const Checkout = () => {
         }
       }
       
-      // Basic card validation
       if (cardInfo.cardNumber.replace(/\s/g, '').length !== 16) {
         toast({
           variant: "destructive",
@@ -148,7 +139,6 @@ const Checkout = () => {
     setIsSubmitting(true);
     
     try {
-      // Prepare order data
       const orderData = {
         items: cart,
         total: parseFloat(finalTotal),
@@ -188,14 +178,10 @@ const Checkout = () => {
         },
       };
       
-      // Call API to create order
       const response = await createMockOrder(orderData);
       
       if (response.success) {
-        // Clear the cart
         clearCart();
-        
-        // Navigate to order confirmation page
         navigate(`/order-confirmation/${response.order.id}`);
       } else {
         throw new Error("Failed to create order");
@@ -217,10 +203,8 @@ const Checkout = () => {
       <h1 className="text-3xl font-bold mb-6">Checkout</h1>
       
       <div className="flex flex-col lg:flex-row gap-10">
-        {/* Checkout Form */}
         <div className="lg:w-2/3">
           <form onSubmit={handleSubmitOrder}>
-            {/* Shipping Information */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-xl font-bold mb-4">Shipping Information</h2>
               
@@ -313,7 +297,6 @@ const Checkout = () => {
                       <SelectItem value="NY">New York</SelectItem>
                       <SelectItem value="TX">Texas</SelectItem>
                       <SelectItem value="WA">Washington</SelectItem>
-                      {/* Add more states as needed */}
                     </SelectContent>
                   </Select>
                 </div>
@@ -342,13 +325,11 @@ const Checkout = () => {
                     <SelectItem value="USA">United States</SelectItem>
                     <SelectItem value="CAN">Canada</SelectItem>
                     <SelectItem value="MEX">Mexico</SelectItem>
-                    {/* Add more countries as needed */}
                   </SelectContent>
                 </Select>
               </div>
             </div>
             
-            {/* Billing Information */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold">Billing Information</h2>
@@ -433,7 +414,6 @@ const Checkout = () => {
                           <SelectItem value="NY">New York</SelectItem>
                           <SelectItem value="TX">Texas</SelectItem>
                           <SelectItem value="WA">Washington</SelectItem>
-                          {/* Add more states as needed */}
                         </SelectContent>
                       </Select>
                     </div>
@@ -452,7 +432,6 @@ const Checkout = () => {
               )}
             </div>
             
-            {/* Payment Method */}
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
               <h2 className="text-xl font-bold mb-4">Payment Method</h2>
               
@@ -462,7 +441,7 @@ const Checkout = () => {
                     <CreditCard className="mr-2 h-4 w-4" /> Credit Card
                   </TabsTrigger>
                   <TabsTrigger value="paypal" className="flex items-center">
-                    <PaypalLogo className="mr-2 h-4 w-4" /> PayPal
+                    <CircleDollarSign className="mr-2 h-4 w-4" /> PayPal
                   </TabsTrigger>
                   <TabsTrigger value="bank-transfer" className="flex items-center">
                     <Landmark className="mr-2 h-4 w-4" /> Bank Transfer
@@ -556,7 +535,6 @@ const Checkout = () => {
           </form>
         </div>
         
-        {/* Order Summary */}
         <div className="lg:w-1/3">
           <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
             <h2 className="text-xl font-bold mb-4">Order Summary</h2>
