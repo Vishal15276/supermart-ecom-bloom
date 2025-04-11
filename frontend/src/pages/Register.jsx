@@ -17,6 +17,7 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "user", // Default role as 'user'
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -83,12 +84,12 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-      await register(formData.name, formData.email, formData.password);
+      await register(formData.name, formData.email, formData.password, formData.role);
       toast({
         title: "Account created successfully!",
         description: "You can now start shopping at SuperMart.",
       });
-      navigate("/");
+      navigate("/"); // Redirect to home page after successful registration
     } catch (error) {
       console.error("Registration failed:", error);
     } finally {
@@ -101,7 +102,9 @@ const Register = () => {
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold">Create an Account</h1>
-          <p className="text-gray-600 mt-1">Join SuperMart for fresh groceries delivered to your door</p>
+          <p className="text-gray-600 mt-1">
+            Join SuperMart for fresh groceries delivered to your door
+          </p>
         </div>
 
         {error && (
@@ -111,32 +114,39 @@ const Register = () => {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Full Name */}
           <div className="space-y-2">
             <Label htmlFor="name">Full Name</Label>
             <Input
               id="name"
               name="name"
               type="text"
-              placeholder="John Doe"
+              placeholder="Full Name"
               value={formData.name}
               onChange={handleChange}
             />
-            {formErrors.name && <p className="text-red-500 text-sm">{formErrors.name}</p>}
+            {formErrors.name && (
+              <p className="text-red-500 text-sm">{formErrors.name}</p>
+            )}
           </div>
 
+          {/* Email */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               name="email"
               type="email"
-              placeholder="your.email@example.com"
+              placeholder="Email address"
               value={formData.email}
               onChange={handleChange}
             />
-            {formErrors.email && <p className="text-red-500 text-sm">{formErrors.email}</p>}
+            {formErrors.email && (
+              <p className="text-red-500 text-sm">{formErrors.email}</p>
+            )}
           </div>
 
+          {/* Password */}
           <div className="space-y-2">
             <Label htmlFor="password">Password</Label>
             <div className="relative">
@@ -153,12 +163,19 @@ const Register = () => {
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
               </button>
             </div>
-            {formErrors.password && <p className="text-red-500 text-sm">{formErrors.password}</p>}
+            {formErrors.password && (
+              <p className="text-red-500 text-sm">{formErrors.password}</p>
+            )}
           </div>
 
+          {/* Confirm Password */}
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">Confirm Password</Label>
             <div className="relative">
@@ -173,26 +190,67 @@ const Register = () => {
               <button
                 type="button"
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                onClick={() =>
+                  setShowConfirmPassword(!showConfirmPassword)
+                }
               >
-                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showConfirmPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
               </button>
             </div>
-            {formErrors.confirmPassword && <p className="text-red-500 text-sm">{formErrors.confirmPassword}</p>}
+            {formErrors.confirmPassword && (
+              <p className="text-red-500 text-sm">
+                {formErrors.confirmPassword}
+              </p>
+            )}
           </div>
 
+          {/* Role Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full p-2 border border-gray-300 rounded-md"
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+            {formErrors.role && (
+              <p className="text-red-500 text-sm">{formErrors.role}</p>
+            )}
+          </div>
+
+          {/* Terms and Conditions */}
           <div className="flex items-start space-x-2">
             <Checkbox
               id="terms"
               checked={agreeToTerms}
               onCheckedChange={setAgreeToTerms}
             />
-            <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
-              I agree to the <a href="#" className="text-supermart-primary hover:underline">Terms and Conditions</a>
+            <Label
+              htmlFor="terms"
+              className="text-sm font-normal cursor-pointer"
+            >
+              I agree to the{" "}
+              <a
+                href="#"
+                className="text-supermart-primary hover:underline"
+              >
+                Terms and Conditions
+              </a>
             </Label>
           </div>
-          {formErrors.terms && <p className="text-red-500 text-sm">{formErrors.terms}</p>}
+          {formErrors.terms && (
+            <p className="text-red-500 text-sm">{formErrors.terms}</p>
+          )}
 
+          {/* Submit Button */}
           <Button
             type="submit"
             className="w-full bg-supermart-primary hover:bg-supermart-dark"
@@ -200,7 +258,8 @@ const Register = () => {
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating
+                account...
               </>
             ) : (
               "Register"
@@ -211,7 +270,10 @@ const Register = () => {
         <div className="text-center mt-6">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <Link to="/login" className="text-supermart-primary hover:underline">
+            <Link
+              to="/login"
+              className="text-supermart-primary hover:underline"
+            >
               Sign In
             </Link>
           </p>

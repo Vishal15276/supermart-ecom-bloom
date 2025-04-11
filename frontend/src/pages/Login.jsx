@@ -18,6 +18,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false); // toggle between user/admin
 
   const from = location.state?.from || "/";
 
@@ -36,26 +37,16 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
-      navigate(from, { replace: true });
+      const role = await login(email, password); // returns the user's role from context
+
+      // Redirect based on role
+      if (role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate(from, { replace: true });
+      }
     } catch (error) {
       console.error("Login failed:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDemoLogin = async (role) => {
-    setIsSubmitting(true);
-    try {
-      if (role === 'admin') {
-        await login('admin@example.com', 'password');
-      } else {
-        await login('user@example.com', 'password');
-      }
-      navigate(from, { replace: true });
-    } catch (error) {
-      console.error("Demo login failed:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -65,8 +56,12 @@ const Login = () => {
     <div className="container mx-auto px-4 py-10">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-8">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold">Welcome Back</h1>
-          <p className="text-gray-600 mt-1">Sign in to your SuperMart account</p>
+          <h1 className="text-2xl font-bold">{isAdmin ? "Admin Login" : "Welcome Back"}</h1>
+          <p className="text-gray-600 mt-1">
+            {isAdmin
+              ? "Sign in to your SuperMart admin panel"
+              : "Sign in to your SuperMart account"}
+          </p>
         </div>
 
         {error && (
@@ -77,7 +72,7 @@ const Login = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{isAdmin ? "Admin Email" : "Email"}</Label>
             <Input
               id="email"
               type="email"
@@ -94,9 +89,14 @@ const Login = () => {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <Label htmlFor="password">Password</Label>
-              <Link to="/forgot-password" className="text-sm text-supermart-primary hover:underline">
-                Forgot password?
-              </Link>
+              {!isAdmin && (
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-supermart-primary hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              )}
             </div>
             <div className="relative">
               <Input
@@ -121,16 +121,18 @@ const Login = () => {
           </div>
 
           <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="remember" 
-              checked={rememberMe} 
+            <Checkbox
+              id="remember"
+              checked={rememberMe}
               onCheckedChange={setRememberMe}
             />
-            <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">Remember me</Label>
+            <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
+              Remember me
+            </Label>
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full bg-supermart-primary hover:bg-supermart-dark"
             disabled={isSubmitting}
           >
@@ -145,32 +147,41 @@ const Login = () => {
         </form>
 
         <div className="text-center mt-6">
-          <p className="text-sm text-gray-600">
-            Don&apos;t have an account?{" "}
-            <Link to="/register" className="text-supermart-primary hover:underline">
-              Create an account
-            </Link>
-          </p>
-        </div>
-
-        <div className="mt-8">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or sign in with demo account</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mt-6">
-            <Button type="button" variant="outline" onClick={() => handleDemoLogin('user')} disabled={isSubmitting}>
-              Demo User
-            </Button>
-            <Button type="button" variant="outline" onClick={() => handleDemoLogin('admin')} disabled={isSubmitting}>
-              Demo Admin
-            </Button>
-          </div>
+          {!isAdmin ? (
+            <>
+              <p className="text-sm text-gray-600">
+                Don&apos;t have an account?{" "}
+                <Link to="/register" className="text-supermart-primary hover:underline">
+                  Create an account
+                </Link>
+              </p>
+              <p className="mt-2 text-sm">
+                Are you an admin?{" "}
+                <button
+                  onClick={() => {
+                    setIsAdmin(true);
+                    resetError();
+                  }}
+                  className="text-supermart-primary hover:underline"
+                >
+                  Switch to Admin Login
+                </button>
+              </p>
+            </>
+          ) : (
+            <p className="text-sm">
+              Not an admin?{" "}
+              <button
+                onClick={() => {
+                  setIsAdmin(false);
+                  resetError();
+                }}
+                className="text-supermart-primary hover:underline"
+              >
+                Switch to User Login
+              </button>
+            </p>
+          )}
         </div>
       </div>
     </div>

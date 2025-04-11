@@ -15,16 +15,17 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const res = await axios.post("http://localhost:3000/api/login", { email, password });
 
-      setCurrentUser(res.data.user);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const user = res.data.user;
+      setCurrentUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", res.data.token);
 
       toast({
         title: "Login Successful",
-        description: `Welcome back, ${res.data.user.name}!`,
+        description: `Welcome back, ${user.name}!`,
       });
 
-      return res.data.user;
+      return user.role; // return the user's role so Login component can redirect
     } catch (err) {
       const message = err.response?.data?.message || "Login failed";
       setError(message);
@@ -44,8 +45,9 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const res = await axios.post("http://localhost:3000/api/register", { name, email, password });
 
-      setCurrentUser(res.data.user);
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+      const user = res.data.user;
+      setCurrentUser(user);
+      localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("token", res.data.token);
 
       toast({
@@ -53,7 +55,7 @@ export const AuthProvider = ({ children }) => {
         description: "Your account has been created!",
       });
 
-      return res.data.user;
+      return user;
     } catch (err) {
       const message = err.response?.data?.message || "Registration failed";
       setError(message);
