@@ -41,7 +41,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold text-supermart-primary">SuperMart</span>
+            <span className="text-2xl font-bold text-supermart-primary">Pooja SuperMart</span>
           </Link>
 
           {/* Desktop Navigation */}

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "@/components/ui/use-toast";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Register = () => {
   const { register, loading, error, resetError } = useAuth();
@@ -17,7 +18,7 @@ const Register = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user", // Default role as 'user'
+    role: "user",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -84,17 +85,64 @@ const Register = () => {
     setIsSubmitting(true);
 
     try {
-      await register(formData.name, formData.email, formData.password, formData.role);
+      await register(
+        formData.name,
+        formData.email,
+        formData.password,
+        formData.role
+      );
       toast({
         title: "Account created successfully!",
         description: "You can now start shopping at SuperMart.",
       });
-      navigate("/"); // Redirect to home page after successful registration
+      navigate("/login");
     } catch (error) {
       console.error("Registration failed:", error);
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // 🔐 Google Sign-Up logic
+  const handleGoogleLogin = async (response) => {
+    const { credential } = response;
+    try {
+      const userData = await fetchGoogleUserData(credential);
+
+      await register(userData.name, userData.email, userData.id, "user");
+
+      toast({
+        title: "Account created with Google!",
+        description: "Welcome to SuperMart 🎉",
+      });
+
+      navigate("/login");
+    } catch (error) {
+      toast({
+        title: "Google Sign-Up Failed",
+        description: error.message || "Something went wrong",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchGoogleUserData = async (token) => {
+    const res = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch Google user data");
+    }
+
+    const data = await res.json();
+    return {
+      name: data.name,
+      email: data.email,
+      id: data.sub, // Use this as a unique pseudo-password
+    };
   };
 
   return (
@@ -221,9 +269,6 @@ const Register = () => {
               <option value="user">User</option>
               <option value="admin">Admin</option>
             </select>
-            {formErrors.role && (
-              <p className="text-red-500 text-sm">{formErrors.role}</p>
-            )}
           </div>
 
           {/* Terms and Conditions */}
@@ -233,15 +278,9 @@ const Register = () => {
               checked={agreeToTerms}
               onCheckedChange={setAgreeToTerms}
             />
-            <Label
-              htmlFor="terms"
-              className="text-sm font-normal cursor-pointer"
-            >
+            <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
               I agree to the{" "}
-              <a
-                href="#"
-                className="text-supermart-primary hover:underline"
-              >
+              <a href="#" className="text-supermart-primary hover:underline">
                 Terms and Conditions
               </a>
             </Label>
@@ -250,7 +289,6 @@ const Register = () => {
             <p className="text-red-500 text-sm">{formErrors.terms}</p>
           )}
 
-          {/* Submit Button */}
           <Button
             type="submit"
             className="w-full bg-supermart-primary hover:bg-supermart-dark"
@@ -258,8 +296,7 @@ const Register = () => {
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating
-                account...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...
               </>
             ) : (
               "Register"
@@ -267,13 +304,18 @@ const Register = () => {
           </Button>
         </form>
 
+        {/* Google Login */}
+        <div className="mt-6">
+          <GoogleLogin
+            onSuccess={handleGoogleLogin}
+            onError={() => console.log("Google Login Failed")}
+          />
+        </div>
+
         <div className="text-center mt-6">
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
-            <Link
-              to="/login"
-              className="text-supermart-primary hover:underline"
-            >
+            <Link to="/login" className="text-supermart-primary hover:underline">
               Sign In
             </Link>
           </p>

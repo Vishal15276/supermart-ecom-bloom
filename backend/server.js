@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { OAuth2Client } from "google-auth-library";
 
 dotenv.config();
 
@@ -14,34 +15,39 @@ app.use(express.json());
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+
+const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // Connect to MongoDB
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log("MongoDB Connected"))
-  .catch(err => console.error("MongoDB Error:", err));
+mongoose
+  .connect(MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("MongoDB Connected"))
+  .catch((err) => console.error("MongoDB Error:", err));
 
 // User Schema
 const userSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true },
   password: String,
-  role: { type: String, default: "user" }, // 'user' or 'admin'
+  role: { type: String, default: "user" },
 });
 
 const User = mongoose.model("User", userSchema);
 
-// Order Schema
-const orderSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
-  totalAmount: { type: Number, required: true },
-  orderDate: { type: Date, default: Date.now },
-  status: { type: String, default: 'Pending' }, // E.g., 'Pending', 'Shipped', 'Delivered'
+// Product Schema
+const productSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  category: { type: String, required: true },
+  price: { type: Number, required: true },
+  stock: { type: Number, required: true },
+  image: { type: String, required: true },
 });
 
-const Order = mongoose.model("Order", orderSchema);
+const Product = mongoose.model("Product", productSchema);
 
 // Generate JWT
 const generateToken = (user) => {
@@ -52,10 +58,9 @@ const generateToken = (user) => {
   );
 };
 
-// Authentication middleware to verify JWT
+// JWT Middleware
 const authenticateToken = (req, res, next) => {
-  const token = req.header("Authorization")?.split(" ")[1]; // Bearer token
-
+  const token = req.header("Authorization")?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "Access denied. No token provided." });
 
   jwt.verify(token, JWT_SECRET, (err, user) => {
@@ -65,16 +70,16 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// Routes
+// Register
 app.post("/api/register", async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role = "user" } = req.body;
 
   try {
     const exists = await User.findOne({ email });
     if (exists) return res.status(400).json({ message: "User already exists" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = await User.create({ name, email, password: hashedPassword });
+    const newUser = await User.create({ name, email, password: hashedPassword, role });
 
     const token = generateToken(newUser);
     res.status(201).json({
@@ -88,10 +93,12 @@ app.post("/api/register", async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Registration Error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
+// Login
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -114,32 +121,72 @@ app.post("/api/login", async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("Login Error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-// Route to get orders by userId
-app.get("/api/orders/:userId", authenticateToken, async (req, res) => {
-  const { userId } = req.params;
-
-  if (req.user.id !== userId) {
-    return res.status(403).json({ message: "You are not authorized to view this order history." });
-  }
+// Google Login
+app.post("/api/google-login", async (req, res) => {
+  const { credential } = req.body;
 
   try {
-    const orders = await Order.find({ userId })
-      .populate("products") // Populate product details if necessary
-      .exec();
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_ID,
+    });
 
-    if (!orders.length) return res.status(404).json({ message: "No orders found." });
+    const payload = ticket.getPayload();
+    const { email, name } = payload;
 
-    res.status(200).json(orders);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching order history", error: err.message });
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({
+        name,
+        email,
+        password: "",
+        role: "user",
+      });
+    }
+
+    const token = generateToken(user);
+
+    res.status(200).json({
+      message: "Google login successful",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Google Login Error:", error);
+    res.status(401).json({ message: "Invalid Google token", error: error.message });
   }
 });
 
-// Start the server
+// Add product (protected)
+app.post("/api/products", authenticateToken, async (req, res) => {
+  const { name, category, price, stock, image } = req.body;
+
+  try {
+    const newProduct = new Product({ name, category, price, stock, image });
+    await newProduct.save();
+
+    res.status(201).json({
+      message: "Product added successfully",
+      product: newProduct,
+    });
+  } catch (err) {
+    console.error("Error adding product:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+});
+
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

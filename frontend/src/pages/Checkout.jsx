@@ -268,7 +268,7 @@ const Checkout = () => {
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div className="space-y-2 col-span-2">
-                  <Label htmlFor="city">City *</Label>
+                  <Label htmlFor="city">District *</Label>
                   <Input
                     id="city"
                     name="city"
@@ -280,25 +280,47 @@ const Checkout = () => {
                 <div className="space-y-2">
                   <Label htmlFor="state">State *</Label>
                   <Select 
-                    value={shippingInfo.state} 
-                    onValueChange={(value) => setShippingInfo(prev => ({ ...prev, state: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="AL">Alabama</SelectItem>
-                      <SelectItem value="AK">Alaska</SelectItem>
-                      <SelectItem value="AZ">Arizona</SelectItem>
-                      <SelectItem value="CA">California</SelectItem>
-                      <SelectItem value="CO">Colorado</SelectItem>
-                      <SelectItem value="FL">Florida</SelectItem>
-                      <SelectItem value="GA">Georgia</SelectItem>
-                      <SelectItem value="NY">New York</SelectItem>
-                      <SelectItem value="TX">Texas</SelectItem>
-                      <SelectItem value="WA">Washington</SelectItem>
-                    </SelectContent>
-                  </Select>
+  value={shippingInfo.state} 
+  onValueChange={(value) => setShippingInfo(prev => ({ ...prev, state: value }))}
+>
+  <SelectTrigger>
+    <SelectValue placeholder="Select State" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="Andhra Pradesh">Andhra Pradesh</SelectItem>
+    <SelectItem value="Arunachal Pradesh">Arunachal Pradesh</SelectItem>
+    <SelectItem value="Assam">Assam</SelectItem>
+    <SelectItem value="Bihar">Bihar</SelectItem>
+    <SelectItem value="Chhattisgarh">Chhattisgarh</SelectItem>
+    <SelectItem value="Goa">Goa</SelectItem>
+    <SelectItem value="Gujarat">Gujarat</SelectItem>
+    <SelectItem value="Haryana">Haryana</SelectItem>
+    <SelectItem value="Himachal Pradesh">Himachal Pradesh</SelectItem>
+    <SelectItem value="Jharkhand">Jharkhand</SelectItem>
+    <SelectItem value="Karnataka">Karnataka</SelectItem>
+    <SelectItem value="Kerala">Kerala</SelectItem>
+    <SelectItem value="Madhya Pradesh">Madhya Pradesh</SelectItem>
+    <SelectItem value="Maharashtra">Maharashtra</SelectItem>
+    <SelectItem value="Manipur">Manipur</SelectItem>
+    <SelectItem value="Meghalaya">Meghalaya</SelectItem>
+    <SelectItem value="Mizoram">Mizoram</SelectItem>
+    <SelectItem value="Nagaland">Nagaland</SelectItem>
+    <SelectItem value="Odisha">Odisha</SelectItem>
+    <SelectItem value="Punjab">Punjab</SelectItem>
+    <SelectItem value="Rajasthan">Rajasthan</SelectItem>
+    <SelectItem value="Sikkim">Sikkim</SelectItem>
+    <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
+    <SelectItem value="Telangana">Telangana</SelectItem>
+    <SelectItem value="Tripura">Tripura</SelectItem>
+    <SelectItem value="Uttar Pradesh">Uttar Pradesh</SelectItem>
+    <SelectItem value="Uttarakhand">Uttarakhand</SelectItem>
+    <SelectItem value="West Bengal">West Bengal</SelectItem>
+    <SelectItem value="Delhi">Delhi</SelectItem>
+    <SelectItem value="Jammu and Kashmir">Jammu and Kashmir</SelectItem>
+    <SelectItem value="Ladakh">Ladakh</SelectItem>
+  </SelectContent>
+</Select>
+
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="zipCode">Zip Code *</Label>
@@ -312,22 +334,7 @@ const Checkout = () => {
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="country">Country *</Label>
-                <Select 
-                  value={shippingInfo.country} 
-                  onValueChange={(value) => setShippingInfo(prev => ({ ...prev, country: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="USA">United States</SelectItem>
-                    <SelectItem value="CAN">Canada</SelectItem>
-                    <SelectItem value="MEX">Mexico</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              
             </div>
             
             <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
@@ -397,25 +404,47 @@ const Checkout = () => {
                     <div className="space-y-2">
                       <Label htmlFor="billingState">State *</Label>
                       <Select 
-                        value={billingInfo.state} 
-                        onValueChange={(value) => setBillingInfo(prev => ({ ...prev, state: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="AL">Alabama</SelectItem>
-                          <SelectItem value="AK">Alaska</SelectItem>
-                          <SelectItem value="AZ">Arizona</SelectItem>
-                          <SelectItem value="CA">California</SelectItem>
-                          <SelectItem value="CO">Colorado</SelectItem>
-                          <SelectItem value="FL">Florida</SelectItem>
-                          <SelectItem value="GA">Georgia</SelectItem>
-                          <SelectItem value="NY">New York</SelectItem>
-                          <SelectItem value="TX">Texas</SelectItem>
-                          <SelectItem value="WA">Washington</SelectItem>
-                        </SelectContent>
-                      </Select>
+  value={shippingInfo.state} 
+  onValueChange={(value) => setShippingInfo(prev => ({ ...prev, state: value }))}
+>
+  <SelectTrigger>
+    <SelectValue placeholder="Select State" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="Andhra Pradesh">Andhra Pradesh</SelectItem>
+    <SelectItem value="Arunachal Pradesh">Arunachal Pradesh</SelectItem>
+    <SelectItem value="Assam">Assam</SelectItem>
+    <SelectItem value="Bihar">Bihar</SelectItem>
+    <SelectItem value="Chhattisgarh">Chhattisgarh</SelectItem>
+    <SelectItem value="Goa">Goa</SelectItem>
+    <SelectItem value="Gujarat">Gujarat</SelectItem>
+    <SelectItem value="Haryana">Haryana</SelectItem>
+    <SelectItem value="Himachal Pradesh">Himachal Pradesh</SelectItem>
+    <SelectItem value="Jharkhand">Jharkhand</SelectItem>
+    <SelectItem value="Karnataka">Karnataka</SelectItem>
+    <SelectItem value="Kerala">Kerala</SelectItem>
+    <SelectItem value="Madhya Pradesh">Madhya Pradesh</SelectItem>
+    <SelectItem value="Maharashtra">Maharashtra</SelectItem>
+    <SelectItem value="Manipur">Manipur</SelectItem>
+    <SelectItem value="Meghalaya">Meghalaya</SelectItem>
+    <SelectItem value="Mizoram">Mizoram</SelectItem>
+    <SelectItem value="Nagaland">Nagaland</SelectItem>
+    <SelectItem value="Odisha">Odisha</SelectItem>
+    <SelectItem value="Punjab">Punjab</SelectItem>
+    <SelectItem value="Rajasthan">Rajasthan</SelectItem>
+    <SelectItem value="Sikkim">Sikkim</SelectItem>
+    <SelectItem value="Tamil Nadu">Tamil Nadu</SelectItem>
+    <SelectItem value="Telangana">Telangana</SelectItem>
+    <SelectItem value="Tripura">Tripura</SelectItem>
+    <SelectItem value="Uttar Pradesh">Uttar Pradesh</SelectItem>
+    <SelectItem value="Uttarakhand">Uttarakhand</SelectItem>
+    <SelectItem value="West Bengal">West Bengal</SelectItem>
+    <SelectItem value="Delhi">Delhi</SelectItem>
+    <SelectItem value="Jammu and Kashmir">Jammu and Kashmir</SelectItem>
+    <SelectItem value="Ladakh">Ladakh</SelectItem>
+  </SelectContent>
+</Select>
+
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="billingZipCode">Zip Code *</Label>

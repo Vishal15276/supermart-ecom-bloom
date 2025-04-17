@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
         description: `Welcome back, ${user.name}!`,
       });
 
-      return user.role; // return the user's role so Login component can redirect
+      return user.role; // Return the user's role for redirection
     } catch (err) {
       const message = err.response?.data?.message || "Login failed";
       setError(message);
@@ -40,10 +40,15 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password) => {
+  const register = async (name, email, password, role) => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:3000/api/register", { name, email, password });
+      const res = await axios.post("http://localhost:3000/api/register", {
+        name,
+        email,
+        password,
+        role, // ✅ Pass the selected role here
+      });
 
       const user = res.data.user;
       setCurrentUser(user);

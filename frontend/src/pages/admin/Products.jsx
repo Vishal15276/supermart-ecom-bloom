@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
@@ -13,7 +12,7 @@ import {
   PlusCircle,
   Edit,
   Trash2,
-  Search
+  Search,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
@@ -27,17 +26,15 @@ const AdminProducts = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 10;
-  
+
+  const navigate = useNavigate();
+
   useEffect(() => {
-    // Simulate API call to fetch products
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Mock data
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
         const mockProducts = [
           { id: 1, name: "Organic Apples", category: "fruits", price: 3.99, stock: 45, image: "/placeholder.svg" },
           { id: 2, name: "Fresh Bananas", category: "fruits", price: 1.99, stock: 78, image: "/placeholder.svg" },
@@ -52,7 +49,7 @@ const AdminProducts = () => {
           { id: 11, name: "Broccoli", category: "vegetables", price: 2.99, stock: 22, image: "/placeholder.svg" },
           { id: 12, name: "Bell Peppers", category: "vegetables", price: 3.49, stock: 19, image: "/placeholder.svg" },
         ];
-        
+
         setProducts(mockProducts);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -65,31 +62,32 @@ const AdminProducts = () => {
         setLoading(false);
       }
     };
-    
+
     fetchProducts();
   }, [toast]);
 
   const handleDeleteProduct = (id) => {
-    // In a real app, this would call an API to delete the product
-    setProducts(products.filter(product => product.id !== id));
-    toast({
-      title: "Product deleted",
-      description: "The product has been successfully removed.",
-    });
+    const confirmed = window.confirm("Are you sure you want to delete this product?");
+    if (confirmed) {
+      setProducts((prev) => prev.filter((product) => product.id !== id));
+      toast({
+        title: "Product deleted",
+        description: "The product has been successfully removed.",
+      });
+    }
   };
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
   };
 
-  // Filter products based on search query
-  const filteredProducts = products.filter(product => 
-    product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.category.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProducts = products.filter(
+    (product) =>
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Pagination
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
@@ -98,7 +96,6 @@ const AdminProducts = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex flex-col lg:flex-row gap-8">
-        {/* Sidebar */}
         <div className="lg:w-64">
           <div className="sticky top-24">
             <div className="bg-white rounded-lg shadow-sm mb-6">
@@ -111,7 +108,10 @@ const AdminProducts = () => {
                     <Layout className="h-5 w-5 mr-3" />
                     Dashboard
                   </Link>
-                  <Link to="/admin/products" className="flex items-center px-3 py-2 rounded-md bg-supermart-light text-supermart-primary">
+                  <Link
+                    to="/admin/products"
+                    className="flex items-center px-3 py-2 rounded-md bg-supermart-light text-supermart-primary"
+                  >
                     <Package className="h-5 w-5 mr-3" />
                     Products
                   </Link>
@@ -130,14 +130,13 @@ const AdminProducts = () => {
                 </nav>
               </div>
             </div>
-            
             <div className="bg-white rounded-lg shadow-sm p-4">
               <Link to="/" className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100">
                 <Package className="h-5 w-5 mr-3" />
                 View Store
               </Link>
-              <button 
-                onClick={logout} 
+              <button
+                onClick={logout}
                 className="flex items-center px-3 py-2 rounded-md hover:bg-gray-100 text-red-600 w-full text-left"
               >
                 <LogOut className="h-5 w-5 mr-3" />
@@ -146,18 +145,16 @@ const AdminProducts = () => {
             </div>
           </div>
         </div>
-        
-        {/* Main Content */}
+
         <div className="flex-1">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">Products</h1>
-            <Button>
+            <Button onClick={() => navigate("/admin/products/add")}>
               <PlusCircle className="h-4 w-4 mr-2" />
               Add Product
             </Button>
           </div>
-          
-          {/* Search & Filters */}
+
           <div className="mb-6">
             <div className="relative">
               <Input
@@ -170,8 +167,7 @@ const AdminProducts = () => {
               <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
             </div>
           </div>
-          
-          {/* Products Table */}
+
           <Card>
             <CardHeader>
               <CardTitle>Product Inventory</CardTitle>
@@ -208,40 +204,46 @@ const AdminProducts = () => {
                           currentProducts.map((product) => (
                             <tr key={product.id} className="hover:bg-gray-50">
                               <td className="p-3">
-                                <img 
-                                  src={product.image} 
+                                <img
+                                  src={product.image}
                                   alt={product.name}
                                   className="h-12 w-12 object-cover rounded"
                                 />
                               </td>
                               <td className="p-3 font-medium">{product.name}</td>
                               <td className="p-3 capitalize">{product.category}</td>
-                              <td className="p-3">${product.price.toFixed(2)}</td>
                               <td className="p-3">
-                                <span className={`px-2 py-1 rounded-full text-xs ${
-                                  product.stock > 20 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : product.stock > 10 
-                                      ? 'bg-yellow-100 text-yellow-800' 
-                                      : 'bg-red-100 text-red-800'
-                                }`}>
+                                {product.price.toLocaleString("en-US", {
+                                  style: "currency",
+                                  currency: "USD",
+                                })}
+                              </td>
+                              <td className="p-3">
+                                <span
+                                  className={`${
+                                    product.stock > 10
+                                      ? "bg-green-100 text-green-600"
+                                      : product.stock > 0
+                                      ? "bg-yellow-100 text-yellow-600"
+                                      : "bg-red-100 text-red-600"
+                                  } px-3 py-1 rounded-full`}
+                                >
                                   {product.stock}
                                 </span>
                               </td>
-                              <td className="p-3">
-                                <div className="flex space-x-2">
-                                  <Button variant="outline" size="sm">
-                                    <Edit className="h-4 w-4" />
-                                  </Button>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="text-red-500 hover:text-red-700"
-                                    onClick={() => handleDeleteProduct(product.id)}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </div>
+                              <td className="p-3 space-x-2">
+                                <button
+                                  onClick={() => navigate(`/admin/products/edit/${product.id}`)}
+                                  className="text-blue-600 hover:text-blue-800"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </button>
+                                <button
+                                  onClick={() => handleDeleteProduct(product.id)}
+                                  className="text-red-600 hover:text-red-800"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
                               </td>
                             </tr>
                           ))
@@ -249,43 +251,30 @@ const AdminProducts = () => {
                       </tbody>
                     </table>
                   </div>
-                  
-                  {/* Pagination */}
-                  {filteredProducts.length > productsPerPage && (
-                    <div className="flex justify-between items-center mt-6">
-                      <div className="text-sm text-gray-500">
-                        Showing {indexOfFirstProduct + 1}-{Math.min(indexOfLastProduct, filteredProducts.length)} of {filteredProducts.length} products
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          disabled={currentPage === 1}
-                          onClick={() => setCurrentPage(currentPage - 1)}
-                        >
-                          Previous
-                        </Button>
-                        {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                          <Button
-                            key={page}
-                            variant={currentPage === page ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => setCurrentPage(page)}
-                          >
-                            {page}
-                          </Button>
-                        ))}
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          disabled={currentPage === totalPages}
-                          onClick={() => setCurrentPage(currentPage + 1)}
-                        >
-                          Next
-                        </Button>
-                      </div>
+
+                  <div className="flex justify-between items-center mt-6">
+                    <div>
+                      Showing{" "}
+                      {indexOfFirstProduct + 1} to {Math.min(indexOfLastProduct, filteredProducts.length)} of{" "}
+                      {filteredProducts.length} products
                     </div>
-                  )}
+                    <div className="space-x-2">
+                      <button
+                        onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                        className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300"
+                      >
+                        Previous
+                      </button>
+                      <button
+                        onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
                 </>
               )}
             </CardContent>

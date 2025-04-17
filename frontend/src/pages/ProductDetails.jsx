@@ -205,7 +205,7 @@ const ProductDetails = () => {
             {product.originalPrice && (
               <>
                 <span className="text-lg text-gray-400 line-through ml-3">
-                  ${product.originalPrice.toFixed(2)}
+                ₹{product.originalPrice.toFixed(2)}
                 </span>
                 <Badge className="ml-3 bg-supermart-secondary text-black">
                   {product.discount}% OFF
