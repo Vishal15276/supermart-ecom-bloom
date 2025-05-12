@@ -1,7 +1,7 @@
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { OAuth2Client } from "google-auth-library";
@@ -9,10 +9,10 @@ import { OAuth2Client } from "google-auth-library";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors()); // Allow CORS (frontend on port 5173)
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000; // ✅ Explicitly set to 3000
 const MONGO_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET;
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -25,8 +25,8 @@ mongoose
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.error("MongoDB Error:", err));
+  .then(() => console.log("✅ MongoDB Connected"))
+  .catch((err) => console.error("❌ MongoDB Error:", err));
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -58,7 +58,7 @@ const generateToken = (user) => {
   );
 };
 
-// JWT Middleware
+// Middleware to authenticate token
 const authenticateToken = (req, res, next) => {
   const token = req.header("Authorization")?.split(" ")[1];
   if (!token) return res.status(401).json({ message: "Access denied. No token provided." });
@@ -69,6 +69,8 @@ const authenticateToken = (req, res, next) => {
     next();
   });
 };
+
+// Routes
 
 // Register
 app.post("/api/register", async (req, res) => {
@@ -168,25 +170,57 @@ app.post("/api/google-login", async (req, res) => {
   }
 });
 
-// Add product (protected)
+// ADD Product
 app.post("/api/products", authenticateToken, async (req, res) => {
   const { name, category, price, stock, image } = req.body;
-
   try {
     const newProduct = new Product({ name, category, price, stock, image });
     await newProduct.save();
-
-    res.status(201).json({
-      message: "Product added successfully",
-      product: newProduct,
-    });
+    res.status(201).json({ message: "Product added successfully", product: newProduct });
   } catch (err) {
     console.error("Error adding product:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
 
-// Start server
+// GET All Products
+app.get("/api/products", async (req, res) => {
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    res.status(500).json({ message: "Error fetching products" });
+  }
+});
+
+// UPDATE Product
+app.put("/api/products/:id", authenticateToken, async (req, res) => {
+  try {
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    res.json(updatedProduct);
+  } catch (err) {
+    console.error("Error updating product:", err);
+    res.status(500).json({ message: "Error updating product", error: err.message });
+  }
+});
+
+// DELETE Product
+app.delete("/api/products/:id", authenticateToken, async (req, res) => {
+  try {
+    await Product.findByIdAndDelete(req.params.id);
+    res.json({ message: "Product deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting product:", err);
+    res.status(500).json({ message: "Error deleting product", error: err.message });
+  }
+});
+
+// Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });

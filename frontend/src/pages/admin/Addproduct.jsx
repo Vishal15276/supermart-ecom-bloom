@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,24 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.name || !formData.category || !formData.price || !formData.stock || !formData.image) {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      toast({
+        title: "Unauthorized",
+        description: "You must be logged in to add a product.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (
+      !formData.name ||
+      !formData.category ||
+      !formData.price ||
+      !formData.stock ||
+      !formData.image
+    ) {
       toast({
         title: "Missing Fields",
         description: "Please fill all the fields.",
@@ -40,14 +57,13 @@ const AddProduct = () => {
     }
 
     try {
-      // Send POST request to the backend to add the product
-      const token = localStorage.getItem("authToken"); // Assuming the token is stored in localStorage after login
       const response = await axios.post(
-        "/api/products",
+        "http://localhost:3000/api/products",
         formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         }
       );
@@ -57,15 +73,24 @@ const AddProduct = () => {
         description: `${formData.name} has been successfully added.`,
       });
 
-      // Redirect to the product listing page after successful submission
       navigate("/admin/products");
     } catch (err) {
       console.error("Error adding product:", err);
-      toast({
-        title: "Error",
-        description: "There was an error adding the product.",
-        variant: "destructive",
-      });
+
+      if (err.response && err.response.status === 401) {
+        toast({
+          title: "Unauthorized",
+          description: "Your session has expired. Please log in again.",
+          variant: "destructive",
+        });
+        navigate("/login");
+      } else {
+        toast({
+          title: "Error",
+          description: "There was an error adding the product.",
+          variant: "destructive",
+        });
+      }
     }
   };
 

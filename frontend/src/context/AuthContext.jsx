@@ -6,19 +6,24 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState(() => JSON.parse(localStorage.getItem("user")) || null);
+  const [currentUser, setCurrentUser] = useState(() =>
+    JSON.parse(localStorage.getItem("user")) || null
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const login = async (email, password) => {
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:3000/api/login", { email, password });
+      const res = await axios.post("http://localhost:3000/api/login", {
+        email,
+        password,
+      });
 
       const user = res.data.user;
       setCurrentUser(user);
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("authToken", res.data.token); // ✅ use 'authToken'
 
       toast({
         title: "Login Successful",
@@ -47,13 +52,13 @@ export const AuthProvider = ({ children }) => {
         name,
         email,
         password,
-        role, // ✅ Pass the selected role here
+        role,
       });
 
       const user = res.data.user;
       setCurrentUser(user);
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("authToken", res.data.token); // ✅ use 'authToken'
 
       toast({
         title: "Registration Successful",
@@ -78,7 +83,7 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setCurrentUser(null);
     localStorage.removeItem("user");
-    localStorage.removeItem("token");
+    localStorage.removeItem("authToken"); // ✅ clear the correct token
 
     toast({
       title: "Logged Out",
