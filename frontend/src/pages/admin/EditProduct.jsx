@@ -1,4 +1,3 @@
-// src/pages/admin/EditProduct.jsx
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/use-toast";
@@ -7,6 +6,7 @@ import { Button } from "@/components/ui/button";
 const EditProduct = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
   const [product, setProduct] = useState({
     name: "",
     category: "",
@@ -14,6 +14,8 @@ const EditProduct = () => {
     stock: "",
     image: "",
   });
+
+  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -38,16 +40,49 @@ const EditProduct = () => {
     setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setImageFile(file);
+
+    if (file) {
+      setProduct({ ...product, image: URL.createObjectURL(file) });
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      toast({
+        title: "Unauthorized",
+        description: "Please log in as an admin to update products.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
+      const formData = new FormData();
+      formData.append("name", product.name);
+      formData.append("category", product.category);
+      formData.append("price", product.price);
+      formData.append("stock", product.stock);
+
+      if (imageFile) {
+        formData.append("image", imageFile);
+      }
+
       const res = await fetch(`http://localhost:3000/api/products/${id}`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          // Do NOT set Content-Type here, browser handles it when using FormData
         },
-        body: JSON.stringify(product),
+        body: formData,
       });
+
+      const result = await res.json();
 
       if (res.ok) {
         toast({
@@ -56,13 +91,13 @@ const EditProduct = () => {
         });
         navigate("/admin/products");
       } else {
-        throw new Error("Failed to update product");
+        throw new Error(result.message || "Failed to update product");
       }
     } catch (error) {
       console.error("Update error:", error);
       toast({
         title: "Error",
-        description: "Failed to update product",
+        description: error.message || "Failed to update product",
         variant: "destructive",
       });
     }
@@ -104,14 +139,25 @@ const EditProduct = () => {
           placeholder="Stock"
           className="w-full border p-2 rounded"
         />
+
+        {product.image && !imageFile && (
+          <div>
+            <p className="text-sm text-gray-600 mb-1">Current Image:</p>
+            <img
+              src={`http://localhost:3000/uploads/${product.image}`}
+              alt="Product"
+              className="w-40 h-40 object-cover rounded mb-2"
+            />
+          </div>
+        )}
+
         <input
-          type="text"
-          name="image"
-          value={product.image}
-          onChange={handleChange}
-          placeholder="Image URL"
-          className="w-full border p-2 rounded"
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="w-full"
         />
+
         <Button type="submit">Update Product</Button>
       </form>
     </div>

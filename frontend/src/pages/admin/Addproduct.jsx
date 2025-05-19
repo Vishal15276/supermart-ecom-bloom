@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -16,15 +16,23 @@ const AddProduct = () => {
     category: "",
     price: "",
     stock: "",
-    image: "",
+    imageFile: null, 
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    const { name, value, files } = e.target;
+
+    if (name === "imageFile") {
+      setFormData((prev) => ({
+        ...prev,
+        imageFile: files[0],
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -46,24 +54,31 @@ const AddProduct = () => {
       !formData.category ||
       !formData.price ||
       !formData.stock ||
-      !formData.image
+      !formData.imageFile
     ) {
       toast({
         title: "Missing Fields",
-        description: "Please fill all the fields.",
+        description: "Please fill all the fields and choose an image.",
         variant: "destructive",
       });
       return;
     }
 
     try {
+      const productData = new FormData();
+      productData.append("name", formData.name);
+      productData.append("category", formData.category);
+      productData.append("price", formData.price);
+      productData.append("stock", formData.stock);
+      productData.append("image", formData.imageFile); // must match backend key
+
       const response = await axios.post(
         "http://localhost:3000/api/products",
-        formData,
+        productData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -145,13 +160,13 @@ const AddProduct = () => {
               />
             </div>
             <div>
-              <Label htmlFor="image">Image URL</Label>
+              <Label htmlFor="imageFile">Image (JPG only)</Label>
               <Input
-                id="image"
-                name="image"
-                value={formData.image}
+                id="imageFile"
+                name="imageFile"
+                type="file"
+                accept="image/jpeg"
                 onChange={handleChange}
-                placeholder="/placeholder.svg or external URL"
               />
             </div>
             <Button type="submit" className="w-full">
