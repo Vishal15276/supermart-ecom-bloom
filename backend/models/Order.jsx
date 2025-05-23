@@ -1,16 +1,19 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  items: [
-    {
-      productId: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
-      quantity: Number,
-    },
-  ],
-  totalAmount: Number,
-  shippingAddress: String,
-  createdAt: { type: Date, default: Date.now },
-});
+const orderSchema = new mongoose.Schema(
+  {
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    products: [
+      {
+        product: { type: mongoose.Schema.Types.ObjectId, ref: "Product" },
+        quantity: { type: Number, required: true },
+      },
+    ],
+    totalAmount: { type: Number, required: true },
+  },
+  { timestamps: true }
+);
 
-export default mongoose.model("Order", orderSchema);
+const Order = mongoose.model("Order", orderSchema);
+
+export default Order;

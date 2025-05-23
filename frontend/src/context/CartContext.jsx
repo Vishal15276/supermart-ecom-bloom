@@ -1,4 +1,3 @@
-
 import { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from "@/components/ui/use-toast";
 
@@ -9,7 +8,7 @@ export const useCart = () => useContext(CartContext);
 export const CartProvider = ({ children }) => {
   const [cart, setCart] = useState([]);
   const [total, setTotal] = useState(0);
-  
+
   // Load cart from localStorage on initial render
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
@@ -28,17 +27,20 @@ export const CartProvider = ({ children }) => {
 
   // Calculate total price
   const calculateTotal = (cartItems) => {
-    const sum = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+    const sum = cartItems.reduce(
+      (acc, item) => acc + item.price * item.quantity,
+      0
+    );
     setTotal(sum);
   };
 
   // Add item to cart
   const addToCart = (product, quantity = 1) => {
     setCart(prevCart => {
-      const existingItemIndex = prevCart.findIndex(item => item.id === product.id);
-      
+      const existingItemIndex = prevCart.findIndex(item => item._id === product._id);
+
       if (existingItemIndex >= 0) {
-        // Item already exists, update quantity
+        // Item already in cart, update quantity
         const updatedCart = [...prevCart];
         updatedCart[existingItemIndex].quantity += quantity;
         toast({
@@ -47,7 +49,7 @@ export const CartProvider = ({ children }) => {
         });
         return updatedCart;
       } else {
-        // Add new item to cart
+        // New item
         toast({
           title: "Added to Cart",
           description: `${product.name} has been added to your cart.`,
@@ -60,16 +62,16 @@ export const CartProvider = ({ children }) => {
   // Remove item from cart
   const removeFromCart = (productId) => {
     setCart(prevCart => {
-      const item = prevCart.find(item => item.id === productId);
-      const updatedCart = prevCart.filter(item => item.id !== productId);
-      
+      const item = prevCart.find(item => item._id === productId);
+      const updatedCart = prevCart.filter(item => item._id !== productId);
+
       if (item) {
         toast({
           title: "Removed from Cart",
           description: `${item.name} has been removed from your cart.`,
         });
       }
-      
+
       return updatedCart;
     });
   };
@@ -80,12 +82,12 @@ export const CartProvider = ({ children }) => {
       removeFromCart(productId);
       return;
     }
-    
-    setCart(prevCart => {
-      return prevCart.map(item => 
-        item.id === productId ? { ...item, quantity } : item
-      );
-    });
+
+    setCart(prevCart =>
+      prevCart.map(item =>
+        item._id === productId ? { ...item, quantity } : item
+      )
+    );
   };
 
   // Clear the entire cart

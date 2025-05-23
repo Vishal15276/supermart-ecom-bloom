@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
@@ -7,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 
 const ProductCard = ({ product }) => {
   const { addToCart, cart, updateQuantity } = useCart();
-  
-  const isInCart = cart.find(item => item.id === product.id);
+
+  // Use _id to match the identifier used in CartContext
+  const isInCart = cart.find(item => item._id === product._id);
   const quantity = isInCart ? isInCart.quantity : 0;
 
   const handleAddToCart = (e) => {
@@ -20,17 +20,17 @@ const ProductCard = ({ product }) => {
   const handleIncreaseQuantity = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    updateQuantity(product.id, quantity + 1);
+    updateQuantity(product._id, quantity + 1);
   };
 
   const handleDecreaseQuantity = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    updateQuantity(product.id, quantity - 1);
+    updateQuantity(product._id, quantity - 1);
   };
 
   return (
-    <Link to={`/product/${product.id}`} className="block">
+    <Link to={`/product/${product._id}`} className="block">
       <div className="product-card h-full flex flex-col">
         <div className="relative">
           {product.discount > 0 && (
@@ -38,9 +38,9 @@ const ProductCard = ({ product }) => {
               {product.discount}% OFF
             </Badge>
           )}
-          <img 
-            src={product.image} 
-            alt={product.name} 
+          <img
+            src={product.imageUrl}
+            alt={product.name}
             className="w-full h-48 object-cover object-center"
           />
         </div>
@@ -50,39 +50,39 @@ const ProductCard = ({ product }) => {
             <p className="text-sm text-gray-500 mb-2">{product.category}</p>
             <div className="flex items-center mb-3">
               <span className="text-lg font-bold text-supermart-primary">
-                ${product.price.toFixed(2)}
+                ₹{product.price.toFixed(2)}
               </span>
               {product.originalPrice && (
                 <span className="text-sm text-gray-400 line-through ml-2">
-                  ${product.originalPrice.toFixed(2)}
+                  ₹{product.originalPrice.toFixed(2)}
                 </span>
               )}
             </div>
           </div>
-          
+
           {isInCart ? (
             <div className="flex items-center justify-between mt-2">
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={handleDecreaseQuantity} 
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleDecreaseQuantity}
                 className="h-8 w-8"
               >
                 <Minus className="h-4 w-4" />
               </Button>
               <span className="mx-2 font-medium">{quantity}</span>
-              <Button 
-                variant="outline" 
-                size="icon" 
-                onClick={handleIncreaseQuantity} 
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleIncreaseQuantity}
                 className="h-8 w-8"
               >
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
           ) : (
-            <Button 
-              onClick={handleAddToCart} 
+            <Button
+              onClick={handleAddToCart}
               className="w-full bg-supermart-primary hover:bg-supermart-dark"
             >
               <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart

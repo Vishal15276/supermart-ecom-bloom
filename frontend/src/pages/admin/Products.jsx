@@ -15,7 +15,6 @@ const AdminProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch products from the backend
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -34,18 +33,16 @@ const AdminProducts = () => {
     }
   };
 
-  // Delete product
   const handleDelete = async (productId) => {
     const confirmed = window.confirm("Are you sure you want to delete this product?");
     if (!confirmed) return;
 
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("authToken");
 
     try {
       const response = await fetch(`http://localhost:3000/api/products/${productId}`, {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -78,7 +75,6 @@ const AdminProducts = () => {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">All Products</h2>
-        {/* ✅ Updated Link path here */}
         <Link to="/admin/products/add">
           <Button>Add Product</Button>
         </Link>
@@ -103,7 +99,11 @@ const AdminProducts = () => {
               <TableRow key={product._id}>
                 <TableCell>
                   <img
-                    src={product.image || "/placeholder.svg"}
+                    src={
+                      product.image
+                        ? `http://localhost:3000/uploads/${product.image}`
+                        : "/placeholder.svg"
+                    }
                     alt={product.name}
                     className="h-12 w-12 object-cover rounded"
                   />
