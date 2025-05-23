@@ -178,5 +178,5 @@ const AddProduct = () => {
     </div>
   );
 };
-
+//new line
 export default AddProduct;

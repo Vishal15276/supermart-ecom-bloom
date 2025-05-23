@@ -17,5 +17,7 @@ export default defineConfig({
         secure: false,
       },
     },
+    host: '0.0.0.0', // important for Render
+    port: 5173
   },
 })
